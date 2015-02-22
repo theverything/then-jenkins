@@ -38,7 +38,7 @@ describe('jenkins', function() {
     helper.cleanup({ test: this }, done);
   });
 
-  describe('build', function() {
+  describe.only('build', function() {
     beforeEach(function(done) {
       helper.setup({ job: true, test: this }, done);
     });
@@ -56,25 +56,29 @@ describe('jenkins', function() {
           .reply(200, fixtures.buildGet);
 
         jobs.push(function(next) {
-          self.jenkins.job.build(self.jobName, function(err, number) {
-            should.not.exist(err);
-
-            next(null, number);
-          });
+          self.jenkins.job.build(self.jobName)
+            .then(function(number) {
+              next(null, number);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
         });
 
         jobs.push(function(next) {
           async.retry(
             100,
             function(next) {
-              self.jenkins.build.get(self.jobName, 1, function(err, data) {
-                if (err) return setTimeout(function() { return next(err); }, 100);
+              self.jenkins.build.get(self.jobName, 1)
+                .then(function(data) {
+                  data.should.have.property('number');
+                  data.number.should.equal(1);
 
-                data.should.have.property('number');
-                data.number.should.equal(1);
-
-                next();
-              });
+                  next();
+                })
+                .catch(function(err) {
+                  if (err) setTimeout(function() { return next(err); }, 100);
+                });
             },
             next
           );
@@ -96,23 +100,28 @@ describe('jenkins', function() {
           .reply(200, fixtures.consoleText, { 'Content-Type': 'text/plain;charset=UTF-8' });
 
         jobs.push(function(next) {
-          self.jenkins.job.build(self.jobName, function(err, number) {
-            should.not.exist(err);
-
-            next(null, number);
-          });
+          self.jenkins.job.build(self.jobName)
+            .then(function(number) {
+              next(null, number);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
         });
 
         jobs.push(function(next) {
           async.retry(
             100,
             function(next) {
-              self.jenkins.build.log(self.jobName, 1, function(err, data) {
-                if (err) return setTimeout(function() { return next(err); }, 100);
-                data.should.be.String.and.containEql('Started by user anonymous');
+              self.jenkins.build.log(self.jobName, 1)
+                .then(function(data) {
+                  data.should.be.String.and.containEql('Started by user anonymous');
 
-                next();
-              });
+                  next();
+                })
+                .catch(function(err) {
+                  if (err) setTimeout(function() { return next(err); }, 100);
+                });
             },
             next
           );
@@ -127,13 +136,14 @@ describe('jenkins', function() {
           .get('/job/test/1/api/json?depth=1')
           .reply(200, fixtures.buildGet);
 
-        this.jenkins.build.get('test', 1, { depth: 1 }, function(err, data) {
-          should.not.exist(err);
-
-          data.should.have.property('number');
-
-          done();
-        });
+        this.jenkins.build.get('test', 1, { depth: 1 })
+          .then(function(data) {
+            data.should.have.property('number');
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
       });
 
       nit('should return error when it does not exist', function(done) {
@@ -141,14 +151,16 @@ describe('jenkins', function() {
           .get('/job/test/2/api/json?depth=0')
           .reply(404);
 
-        this.jenkins.build.get('test', 2, function(err, data) {
-          should.exist(err);
-          should.equal(err.message, 'jenkins: build.get: test 2 not found');
+        this.jenkins.build.get('test', 2)
+          .then(function(data) {
+            should.not.exist(data);
+          })
+          .catch(function(err) {
+            should.exist(err);
+            should.equal(err.message, 'jenkins: build.get: test 2 not found');
 
-          should.not.exist(data);
-
-          done();
-        });
+            done();
+          });
       });
     });
 
@@ -165,22 +177,26 @@ describe('jenkins', function() {
           .reply(302);
 
         jobs.push(function(next) {
-          self.jenkins.job.build(self.jobName, function(err, number) {
-            should.not.exist(err);
-
-            next(null, number);
-          });
+          self.jenkins.job.build(self.jobName)
+            .then(function(number) {
+              next(null, number);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
         });
 
         jobs.push(function(next) {
           async.retry(
             100,
             function(next) {
-              self.jenkins.build.stop(self.jobName, 1, function(err) {
-                if (err) return setTimeout(function() { return next(err); }, 100);
-
-                next();
-              });
+              self.jenkins.build.stop(self.jobName, 1)
+                .then(function() {
+                  next();
+                })
+                .catch(function(err) {
+                  if (err) setTimeout(function() { return next(err); }, 100);
+                });
             },
             next
           );
