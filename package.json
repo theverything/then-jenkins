@@ -4,7 +4,6 @@
   "version": "0.7.0",
   "main": "./lib",
   "dependencies": {
-    "bluebird": "^2.9.12",
     "jenkins": "^0.7.0"
   },
   "devDependencies": {
