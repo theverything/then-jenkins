@@ -36,5 +36,9 @@
     "style": "./node_modules/.bin/jscs lib test",
     "test": "mocha --recursive --check-leaks --timeout 15000",
     "_test": "npm run lint && npm run style && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive --check-leaks --timeout 15000"
+  },
+  "engines": {
+    "node": ">=0.12",
+    "npm": "^2.5.0"
   }
 }
