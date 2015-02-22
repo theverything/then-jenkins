@@ -34,8 +34,8 @@
     "cover": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive --check-leaks --timeout 15000",
     "lint": "./node_modules/.bin/jshint lib test",
     "style": "./node_modules/.bin/jscs lib test",
-    "_test": "mocha --recursive --check-leaks --timeout 15000",
-    "test": "npm run lint && npm run style && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive --check-leaks --timeout 15000"
+    "test": "mocha --recursive --check-leaks --timeout 15000",
+    "_test": "npm run lint && npm run style && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive --check-leaks --timeout 15000"
   },
   "engines": {
     "node": ">=0.12",
