@@ -787,7 +787,7 @@ describe('jenkins', function() {
             should.exist(err);
             should.equal(err.message, 'jenkins: job.get: test not found');
             done();
-          });      
+          });
       });
     });
 
@@ -837,427 +837,501 @@ describe('jenkins', function() {
     });
   });
 
-  // describe('node', function() {
-  //   beforeEach(function(done) {
-  //     helper.setup({ node: true, test: this }, done);
-  //   });
-
-  //   describe('config', function() {
-  //     it('should get master config', function(done) {
-  //       this.nock
-  //         .get('/computer/(master)/config.xml')
-  //         .reply(200, fixtures.nodeConfigMaster);
-
-  //       this.jenkins.node.config('master', function(err, data) {
-  //         should.not.exist(err);
-
-  //         data.should.containEql('numExecutors');
-
-  //         done();
-  //       });
-  //     });
-
-  //     it('should error on master update', function(done) {
-  //       this.jenkins.node.config('master', 'xml', function(err) {
-  //         should.exist(err);
-
-  //         err.message.should.eql('jenkins: node.config: master not supported');
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('create', function() {
-  //     it('should create node', function(done) {
-  //       var name = 'test-node-' + uuid.v4();
-
-  //       this.nock
-  //         .post('/computer/doCreateItem?' + fixtures.nodeCreateQuery.replace(/{name}/g, name))
-  //         .reply(302, '', { location: 'http://localhost:8080/computer/' });
-
-  //       this.jenkins.node.create(name, function(err) {
-  //         should.not.exist(err);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('destroy', function() {
-  //     it('should delete node', function(done) {
-  //       var self = this;
-
-  //       self.nock
-  //         .head('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200)
-  //         .post('/computer/' + self.nodeName + '/doDelete')
-  //         .reply(302, '')
-  //         .head('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(404);
-
-  //       var jobs = {};
-
-  //       jobs.before = function(next) {
-  //         self.jenkins.node.exists(self.nodeName, function(err, exists) {
-  //           should.not.exist(err);
-
-  //           next(null, exists);
-  //         });
-  //       };
-
-  //       jobs.destroy = ['before', function(next) {
-  //         self.jenkins.node.destroy(self.nodeName, next);
-  //       }];
-
-  //       jobs.after = ['destroy', function(next) {
-  //         self.jenkins.node.exists(self.nodeName, function(err, exists) {
-  //           should.not.exist(err);
-
-  //           next(null, exists);
-  //         });
-  //       }];
-
-  //       async.auto(jobs, function(err, results) {
-  //         should.not.exist(err);
-
-  //         results.before.should.equal(true);
-  //         results.after.should.equal(false);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('disable', function() {
-  //     it('should disable node', function(done) {
-  //       var self = this;
-
-  //       self.nock
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet)
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet)
-  //         .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=away')
-  //         .reply(302, '')
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGetOffline)
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGetOffline)
-  //         .post('/computer/' + self.nodeName + '/changeOfflineCause',
-  //           'offlineMessage=update&json=%7B%22offlineMessage%22%3A%22update%22%7D&' +
-  //           'Submit=Update%20reason')
-  //         .reply(302, '')
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGetOfflineUpdate);
-
-  //       var jobs = {};
-
-  //       jobs.beforeDisable = function(next) {
-  //         self.jenkins.node.get(self.nodeName, function(err, node) {
-  //           should.not.exist(err);
-
-  //           next(null, node);
-  //         });
-  //       };
-
-  //       jobs.disable = ['beforeDisable', function(next) {
-  //         self.jenkins.node.disable(self.nodeName, 'away', next);
-  //       }];
-
-  //       jobs.afterDisable = ['disable', function(next) {
-  //         self.jenkins.node.get(self.nodeName, function(err, node) {
-  //           should.not.exist(err);
-
-  //           next(null, node);
-  //         });
-  //       }];
-
-  //       jobs.update = ['afterDisable', function(next) {
-  //         self.jenkins.node.disable(self.nodeName, 'update', next);
-  //       }];
-
-  //       jobs.afterUpdate = ['update', function(next) {
-  //         self.jenkins.node.get(self.nodeName, function(err, node) {
-  //           should.not.exist(err);
-
-  //           next(null, node);
-  //         });
-  //       }];
-
-  //       async.auto(jobs, function(err, results) {
-  //         should.not.exist(err);
-
-  //         results.beforeDisable.temporarilyOffline.should.equal(false);
-  //         results.afterDisable.temporarilyOffline.should.equal(true);
-  //         results.afterDisable.offlineCauseReason.should.equal('away');
-  //         results.afterUpdate.temporarilyOffline.should.equal(true);
-  //         results.afterUpdate.offlineCauseReason.should.equal('update');
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('enable', function() {
-  //     it('should enable node', function(done) {
-  //       var self = this;
-
-  //       self.nock
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet)
-  //         .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=away')
-  //         .reply(302, '')
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGetOffline)
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGetOffline)
-  //         .get('/computer/' + self.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet)
-  //         .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=')
-  //         .reply(302, '');
-
-  //       var jobs = {};
-
-  //       jobs.disable = function(next) {
-  //         self.jenkins.node.disable(self.nodeName, 'away', next);
-  //       };
-
-  //       jobs.before = ['disable', function(next) {
-  //         self.jenkins.node.get(self.nodeName, function(err, node) {
-  //           should.not.exist(err);
-
-  //           next(null, node);
-  //         });
-  //       }];
-
-  //       jobs.enable = ['before', function(next) {
-  //         self.jenkins.node.enable(self.nodeName, next);
-  //       }];
-
-  //       jobs.after = ['enable', function(next) {
-  //         self.jenkins.node.get(self.nodeName, function(err, node) {
-  //           should.not.exist(err);
-
-  //           next(null, node);
-  //         });
-  //       }];
-
-  //       async.auto(jobs, function(err, results) {
-  //         should.not.exist(err);
-
-  //         results.before.temporarilyOffline.should.equal(true);
-  //         results.after.temporarilyOffline.should.equal(false);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('exists', function() {
-  //     it('should not find node', function(done) {
-  //       var name = this.nodeName + '-nope';
-
-  //       this.nock
-  //         .head('/computer/' + name + '/api/json?depth=0')
-  //         .reply(404);
-
-  //       this.jenkins.node.exists(name, function(err, exists) {
-  //         should.not.exist(err);
-
-  //         exists.should.equal(false);
-
-  //         done();
-  //       });
-  //     });
-
-  //     it('should find node', function(done) {
-  //       this.nock
-  //         .head('/computer/' + this.nodeName + '/api/json?depth=0')
-  //         .reply(200);
-
-  //       this.jenkins.node.exists(this.nodeName, function(err, exists) {
-  //         should.not.exist(err);
-
-  //         exists.should.equal(true);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('get', function() {
-  //     it('should get node details', function(done) {
-  //       this.nock
-  //         .get('/computer/' + this.nodeName + '/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet);
-
-  //       this.jenkins.node.get(this.nodeName, function(err, node) {
-  //         should.not.exist(err);
-
-  //         should.exist(node);
-
-  //         node.should.have.properties('displayName');
-
-  //         done();
-  //       });
-  //     });
-
-  //     it('should get master', function(done) {
-  //       this.nock
-  //         .get('/computer/(master)/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet);
-
-  //       this.jenkins.node.get('master', function(err, node) {
-  //         should.not.exist(err);
-
-  //         should.exist(node);
-
-  //         node.should.have.properties('displayName');
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('list', function() {
-  //     it('should list nodes', function(done) {
-  //       this.nock
-  //         .get('/computer/api/json?depth=0')
-  //         .reply(200, fixtures.nodeList);
-
-  //       this.jenkins.node.list(function(err, nodes) {
-  //         should.not.exist(err);
-
-  //         should.exist(nodes);
-
-  //         nodes.should.be.instanceof(Array);
-  //         nodes.should.not.be.empty;
-
-  //         done();
-  //       });
-  //     });
-  //   });
-  // });
-
-  // describe('queue', function() {
-  //   beforeEach(function(done) {
-  //     helper.setup({ job: true, test: this }, done);
-  //   });
-
-  //   describe('list', function() {
-  //     it('should list queue', function(done) {
-  //       var self = this;
-
-  //       self.nock
-  //         .get('/queue/api/json?depth=0')
-  //         .reply(200, fixtures.queueList)
-  //         .post('/job/' + self.jobName + '/build')
-  //         .reply(201, '', { location: 'http://localhost:8080/queue/item/124/' });
-
-  //       var jobs = {};
-  //       var stop = false;
-
-  //       jobs.list = function(next) {
-  //         async.retry(
-  //           1000,
-  //           function(next) {
-  //             self.jenkins.queue.list(function(err, queue) {
-  //               if (!err && queue && !queue.length) {
-  //                 err = new Error('no queue');
-  //               }
-  //               if (err) return next(err);
-
-  //               stop = true;
-
-  //               queue.should.be.instanceof(Array);
-
-  //               next();
-  //             });
-  //           },
-  //           next
-  //         );
-  //       };
-
-  //       jobs.builds = function(next) {
-  //         async.retry(
-  //           1000,
-  //           function(next) {
-  //             if (stop) return next();
-
-  //             self.jenkins.job.build(self.jobName, function(err) {
-  //               if (err) return next(err);
-  //               if (!stop) return next(new Error('queue more'));
-
-  //               next();
-  //             });
-  //           },
-  //           next
-  //         );
-  //       };
-
-  //       async.parallel(jobs, function(err) {
-  //         should.not.exist(err);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('get', function() {
-  //     nit('should work', function(done) {
-  //       this.nock
-  //         .get('/computer/(master)/api/json?depth=0')
-  //         .reply(200, fixtures.nodeGet);
-
-  //       this.jenkins.node.get('master', function(err, data) {
-  //         should.not.exist(err);
-
-  //         should.exist(data);
-
-  //         done();
-  //       });
-  //     });
-
-  //     it('should work with options', function(done) {
-  //       this.nock
-  //         .get('/queue/api/json?depth=1')
-  //         .reply(200, fixtures.queueList);
-
-  //       this.jenkins.queue.get({ depth: 1 }, function(err, data) {
-  //         should.not.exist(err);
-
-  //         should.exist(data);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-
-  //   ndescribe('cancel', function() {
-  //     it('should work', function(done) {
-  //       this.nock
-  //         .post('/queue/items/1/cancelQueue', '')
-  //         .reply(200);
-
-  //       this.jenkins.queue.cancel(1, function(err) {
-  //         should.not.exist(err);
-
-  //         done();
-  //       });
-  //     });
-
-  //     it('should return error on failure', function(done) {
-  //       this.nock
-  //         .post('/queue/items/1/cancelQueue', '')
-  //         .reply(500);
-
-  //       this.jenkins.queue.cancel(1, function(err) {
-  //         should.exist(err);
-
-  //         done();
-  //       });
-  //     });
-  //   });
-  // });
+  describe('node', function() {
+    beforeEach(function(done) {
+      helper.setup({ node: true, test: this }, done);
+    });
+
+    describe('config', function() {
+      it('should get master config', function(done) {
+        this.nock
+          .get('/computer/(master)/config.xml')
+          .reply(200, fixtures.nodeConfigMaster);
+
+        this.jenkins.node.config('master')
+          .then(function(data) {
+            data.should.containEql('numExecutors');
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+
+      it('should error on master update', function(done) {
+        this.jenkins.node.config('master', 'xml')
+          .then(function() {})
+          .catch(function(err) {
+            should.exist(err);
+
+            err.message.should.eql('jenkins: node.config: master not supported');
+
+            done();
+          });
+      });
+    });
+
+    describe('create', function() {
+      it('should create node', function(done) {
+        var name = 'test-node-' + uuid.v4();
+
+        this.nock
+          .post('/computer/doCreateItem?' + fixtures.nodeCreateQuery.replace(/{name}/g, name))
+          .reply(302, '', { location: 'http://localhost:8080/computer/' });
+
+        this.jenkins.node.create(name)
+          .then(function() {
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+    });
+
+    describe('destroy', function() {
+      it('should delete node', function(done) {
+        var self = this;
+
+        self.nock
+          .head('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200)
+          .post('/computer/' + self.nodeName + '/doDelete')
+          .reply(302, '')
+          .head('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(404);
+
+        var jobs = {};
+
+        jobs.before = function(next) {
+          self.jenkins.node.exists(self.nodeName)
+            .then(function(exists) {
+              next(null, exists);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        };
+
+        jobs.destroy = ['before', function(next) {
+          self.jenkins.node.destroy(self.nodeName)
+            .then(function(res) {
+              next(null, res);
+            })
+            .catch(function(err) {
+              next(err);
+            });
+        }];
+
+        jobs.after = ['destroy', function(next) {
+          self.jenkins.node.exists(self.nodeName)
+            .then(function(exists) {
+              next(null, exists);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        }];
+
+        async.auto(jobs, function(err, results) {
+          should.not.exist(err);
+
+          results.before.should.equal(true);
+          results.after.should.equal(false);
+
+          done();
+        });
+      });
+    });
+
+    describe('disable', function() {
+      it('should disable node', function(done) {
+        var self = this;
+
+        self.nock
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGet)
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGet)
+          .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=away')
+          .reply(302, '')
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGetOffline)
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGetOffline)
+          .post('/computer/' + self.nodeName + '/changeOfflineCause',
+            'offlineMessage=update&json=%7B%22offlineMessage%22%3A%22update%22%7D&' +
+            'Submit=Update%20reason')
+          .reply(302, '')
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGetOfflineUpdate);
+
+        var jobs = {};
+
+        jobs.beforeDisable = function(next) {
+          self.jenkins.node.get(self.nodeName)
+            .then(function(node) {
+              next(null, node);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        };
+
+        jobs.disable = ['beforeDisable', function(next) {
+          self.jenkins.node.disable(self.nodeName, 'away')
+            .then(function(res) {
+              next(null, res);
+            })
+            .catch(function(err) {
+              next(err);
+            });
+        }];
+
+        jobs.afterDisable = ['disable', function(next) {
+          self.jenkins.node.get(self.nodeName)
+            .then(function(node) {
+              next(null, node);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        }];
+
+        jobs.update = ['afterDisable', function(next) {
+          self.jenkins.node.disable(self.nodeName, 'update')
+            .then(function(res) {
+              next(null, res);
+            })
+            .catch(function(err) {
+              next(err);
+            });
+        }];
+
+        jobs.afterUpdate = ['update', function(next) {
+          self.jenkins.node.get(self.nodeName)
+            .then(function(node) {
+              next(null, node);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        }];
+
+        async.auto(jobs, function(err, results) {
+          should.not.exist(err);
+
+          results.beforeDisable.temporarilyOffline.should.equal(false);
+          results.afterDisable.temporarilyOffline.should.equal(true);
+          results.afterDisable.offlineCauseReason.should.equal('away');
+          results.afterUpdate.temporarilyOffline.should.equal(true);
+          results.afterUpdate.offlineCauseReason.should.equal('update');
+
+          done();
+        });
+      });
+    });
+
+    describe('enable', function() {
+      it('should enable node', function(done) {
+        var self = this;
+
+        self.nock
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGet)
+          .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=away')
+          .reply(302, '')
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGetOffline)
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGetOffline)
+          .get('/computer/' + self.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGet)
+          .post('/computer/' + self.nodeName + '/toggleOffline?offlineMessage=')
+          .reply(302, '');
+
+        var jobs = {};
+
+        jobs.disable = function(next) {
+          self.jenkins.node.disable(self.nodeName, 'away')
+            .then(function(res) {
+              next(null, res);
+            })
+            .catch(function(err) {
+              next(err)
+            });
+        };
+
+        jobs.before = ['disable', function(next) {
+          self.jenkins.node.get(self.nodeName)
+            .then(function(node) {
+              next(null, node);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        }];
+
+        jobs.enable = ['before', function(next) {
+          self.jenkins.node.enable(self.nodeName)
+            .then(function(res) {
+              next(null, res);
+            })
+            .catch(function(err) {
+              next(err)
+            });
+        }];
+
+        jobs.after = ['enable', function(next) {
+          self.jenkins.node.get(self.nodeName)
+            .then(function(node) {
+              next(null, node);
+            })
+            .catch(function(err) {
+              should.not.exist(err);
+            });
+        }];
+
+        async.auto(jobs, function(err, results) {
+          should.not.exist(err);
+
+          results.before.temporarilyOffline.should.equal(true);
+          results.after.temporarilyOffline.should.equal(false);
+
+          done();
+        });
+      });
+    });
+
+    describe('exists', function() {
+      it('should not find node', function(done) {
+        var name = this.nodeName + '-nope';
+
+        this.nock
+          .head('/computer/' + name + '/api/json?depth=0')
+          .reply(404);
+
+        this.jenkins.node.exists(name)
+          .then(function(exists) {
+            exists.should.equal(false);
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+
+      it('should find node', function(done) {
+        this.nock
+          .head('/computer/' + this.nodeName + '/api/json?depth=0')
+          .reply(200);
+
+        this.jenkins.node.exists(this.nodeName)
+          .then(function(exists) {
+            exists.should.equal(true);
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+    });
+
+    describe('get', function() {
+      it('should get node details', function(done) {
+        this.nock
+          .get('/computer/' + this.nodeName + '/api/json?depth=0')
+          .reply(200, fixtures.nodeGet);
+
+        this.jenkins.node.get(this.nodeName)
+          .then(function(node) {
+            should.exist(node);
+
+            node.should.have.properties('displayName');
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+
+      it('should get master', function(done) {
+        this.nock
+          .get('/computer/(master)/api/json?depth=0')
+          .reply(200, fixtures.nodeGet);
+
+        this.jenkins.node.get('master')
+          .then(function(node) {
+            should.exist(node);
+
+            node.should.have.properties('displayName');
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+    });
+
+    describe('list', function() {
+      it('should list nodes', function(done) {
+        this.nock
+          .get('/computer/api/json?depth=0')
+          .reply(200, fixtures.nodeList);
+
+        this.jenkins.node.list()
+          .then(function(nodes) {
+            should.exist(nodes);
+
+            nodes.should.be.instanceof(Array);
+            nodes.should.not.be.empty;
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+    });
+  });
+
+  describe('queue', function() {
+    beforeEach(function(done) {
+      helper.setup({ job: true, test: this }, done);
+    });
+
+    describe('list', function() {
+      it('should list queue', function(done) {
+        var self = this;
+
+        self.nock
+          .get('/queue/api/json?depth=0')
+          .reply(200, fixtures.queueList)
+          .post('/job/' + self.jobName + '/build')
+          .reply(201, '', { location: 'http://localhost:8080/queue/item/124/' });
+
+        var jobs = {};
+        var stop = false;
+
+        jobs.list = function(next) {
+          async.retry(
+            1000,
+            function(next) {
+              self.jenkins.queue.list()
+                .then(function(queue) {
+                  if (queue && !queue.length) {
+                    return next(new Error('no queue'));
+                  }
+
+                  stop = true;
+
+                  queue.should.be.instanceof(Array);
+
+                  next();
+                })
+                .catch(function(err) {
+                  next(err)
+                });
+            },
+            next
+          );
+        };
+
+        jobs.builds = function(next) {
+          async.retry(
+            1000,
+            function(next) {
+              if (stop) return next();
+
+              self.jenkins.job.build(self.jobName)
+                .then(function() {
+                  if (!stop) return next(new Error('queue more'));
+
+                  next();
+                })
+                .catch(function(err) {
+                  if (err) return next(err);
+                });
+            },
+            next
+          );
+        };
+
+        async.parallel(jobs, function(err) {
+          should.not.exist(err);
+
+          done();
+        });
+      });
+    });
+
+    describe('get', function() {
+      nit('should work', function(done) {
+        this.nock
+          .get('/computer/(master)/api/json?depth=0')
+          .reply(200, fixtures.nodeGet);
+
+        this.jenkins.node.get('master')
+          .then(function(data) {
+            should.exist(data);
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+
+      it('should work with options', function(done) {
+        this.nock
+          .get('/queue/api/json?depth=1')
+          .reply(200, fixtures.queueList);
+
+        this.jenkins.queue.get({ depth: 1 })
+          .then(function(data) {
+            should.exist(data);
+
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });
+      });
+    });
+
+    ndescribe('cancel', function() {
+      it('should work', function(done) {
+        this.nock
+          .post('/queue/items/1/cancelQueue', '')
+          .reply(200);
+
+        this.jenkins.queue.cancel(1)
+          .then(function() {
+            done();
+          })
+          .catch(function(err) {
+            should.not.exist(err);
+          });;
+      });
+
+      it('should return error on failure', function(done) {
+        this.nock
+          .post('/queue/items/1/cancelQueue', '')
+          .reply(500);
+
+        this.jenkins.queue.cancel(1)
+          .then(function() {})
+          .catch(function(err) {
+            should.exist(err);
+
+            done();
+          });
+      });
+    });
+  });
 });
